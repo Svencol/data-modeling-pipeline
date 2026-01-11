@@ -1,0 +1,120 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw data loaded from ingestion pipeline
+    schema: raw
+    tables:
+      - name: customers
+        description: Raw customer records from CSV ingestion
+        columns:
+          - name: customer_id
+            description: Unique customer identifier
+            tests:
+              - not_null
+          - name: email
+            description: Customer email address
+            tests:
+              - not_null
+          - name: country
+            description: Customer country
+
+      - name: products
+        description: Raw product catalog from CSV ingestion
+        columns:
+          - name: product_id
+            description: Unique product identifier
+            tests:
+              - not_null
+          - name: price
+            description: Product selling price
+            tests:
+              - not_null
+          - name: cost
+            description: Product cost
+
+      - name: orders
+        description: Raw order transactions from CSV ingestion
+        columns:
+          - name: order_id
+            description: Unique order identifier
+            tests:
+              - not_null
+          - name: customer_id
+            description: Foreign key to customers
+            tests:
+              - not_null
+          - name: product_id
+            description: Foreign key to products
+            tests:
+              - not_null
+
+models:
+  - name: stg_customers
+    description: Cleaned and standardized customer records
+    columns:
+      - name: customer_id
+        description: Unique customer identifier
+        tests:
+          - unique
+          - not_null
+      - name: email
+        description: Lowercase email address
+        tests:
+          - unique
+          - not_null
+      - name: full_name
+        description: Combined first and last name
+      - name: country
+        description: Customer country
+
+  - name: stg_products
+    description: Cleaned and standardized product catalog
+    columns:
+      - name: product_id
+        description: Unique product identifier
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        description: Product display name
+        tests:
+          - not_null
+      - name: category
+        description: Product category
+      - name: price
+        description: Selling price in base currency
+        tests:
+          - not_null
+      - name: cost
+        description: Cost price in base currency
+      - name: profit_margin
+        description: Calculated profit margin percentage
+
+  - name: stg_orders
+    description: Cleaned and standardized order transactions
+    columns:
+      - name: order_id
+        description: Unique order identifier
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Foreign key to stg_customers
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: product_id
+        description: Foreign key to stg_products
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_products')
+              field: product_id
+      - name: status
+        description: Order status
+        tests:
+          - accepted_values:
+              values: ['pending', 'shipped', 'completed', 'cancelled']

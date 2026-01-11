@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: Fact table containing all order transactions with calculated metrics
+    columns:
+      - name: order_id
+        description: Primary key - unique order identifier
+        tests:
+          - unique
+          - not_null
+      - name: order_total
+        description: Total revenue from the order
+        tests:
+          - not_null
+      - name: order_profit
+        description: Profit from the order
+        tests:
+          - not_null
+
+  - name: dim_customers
+    description: Customer dimension with lifetime value metrics
+    columns:
+      - name: customer_id
+        description: Primary key - unique customer identifier
+        tests:
+          - unique
+          - not_null
+      - name: total_orders
+        description: Total number of orders placed
+      - name: lifetime_value
+        description: Total revenue from customer
+      - name: customer_segment
+        description: Customer tier based on lifetime value
+        tests:
+          - accepted_values:
+              values: ['Bronze', 'Silver', 'Gold', 'Platinum']
+
+  - name: dim_products
+    description: Product dimension with sales metrics
+    columns:
+      - name: product_id
+        description: Primary key - unique product identifier
+        tests:
+          - unique
+          - not_null
+      - name: total_quantity_sold
+        description: Total units sold
+      - name: total_revenue
+        description: Total revenue generated

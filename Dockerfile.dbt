@@ -1,0 +1,23 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    gcc \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dbt
+RUN pip install --no-cache-dir dbt-postgres==1.7.4
+
+# Copy dbt project
+COPY dbt_project/ /app/dbt_project/
+
+WORKDIR /app/dbt_project
+
+# Set dbt profiles directory
+ENV DBT_PROFILES_DIR=/app/dbt_project
+
+CMD ["dbt", "run"]
